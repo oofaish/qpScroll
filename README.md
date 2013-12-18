@@ -12,6 +12,7 @@ I have kept it super simple - the three major settings are:
 How to kick it off?
 ===================
 Make sure you have jQuery loaded - link the following file:
+
     <script type="text/javascript" src=“qpscroll.js"></script>
 
 And then set a parallax background like so:
