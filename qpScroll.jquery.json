@@ -7,7 +7,7 @@
         "name": "Ali Cigari",
         "url": "http://cigari.co.uk"
     },
-  "version": "0.0.4",
+  "version": "0.1.0",
   "main": "qpscroll.js",
   "dependencies": {
         "jquery": ">=1.0"
