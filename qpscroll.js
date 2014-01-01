@@ -11,12 +11,109 @@
     ** basically where all the function are defined
         ***********************************************************/
     var helpers = { 
+    		
+    		/**********************************************************
+             ** scrollToNewPosition
+             ***********************************************************/
+            scrollToNewPosition: function( $that, yPos, options ) {
+                //var yPos = -$this.scrollTop();
+                var scrollDataStringArray = $that.data('qpscroll').split( "," );
+                var scrollDataArray = [];
+                $.each( scrollDataStringArray, function( index, positionString ){
+                   scrollDataArray[ index ] = parseInt( positionString );
+                });
+                
+                var coords = '';
+                var speed = options.firstSpeed;
+                
+                $.each( scrollDataArray , function( index, position ){
+                    
+                    speed = options.firstSpeed / Math.pow( options.neighbourRatio, ( numberOfImages - index ) );;
+                    var yPos2 = ( yPos / speed );
+                    if( coords.length > 0 )
+                        coords += ', ';
+                    coords += 'right ' + ( yPos2 + position ) + 'px'; 
+                } );
+
+                // Move the background
+                $that.css({ backgroundPosition: coords });
+            }, 
+
+    		/**********************************************************
+             ** setupBackgroundAfterImageLoad
+             ***********************************************************/
+    		setupBackgroundAfterImageLoad: function( scrollElement, div, imageLinks, imageWidths, imageHeights, options )
+    		{
+                var myWidth = scrollElement.innerWidth();
+                var index2;
+                var yPosTillNow = 0;
+                var totalHeight = 0;
+                var backgroundImage = '';
+                var backgroundSize = '';
+                var backgroundPosition = '';
+                var scrollData = '';
+
+                for( index2 = imageLinks.length - 1; index2 >= 0; index2 -- )
+                {
+                    var imageLink = imageLinks[ index2 ];
+                    var width = imageWidths[ index2 ];
+                    var height = imageHeights[ index2 ];
+                    var expectedHeight = Math.ceil( height * myWidth / width ) - offset;
+                    totalHeight += expectedHeight;
+                }
+                
+                yPosTillNow = totalHeight; 
+                
+                for( index2 = imageLinks.length - 1; index2 >= 0; index2 -- )
+                {
+                    var imageLink = imageLinks[ index2 ];
+                    var width = imageWidths[ index2 ];
+                    var height = imageHeights[ index2 ];
+                    
+                    var expectedHeight = Math.ceil( height * myWidth / width ) - offset;
+                    if( backgroundImage.length > 0 )
+                    {
+                        backgroundImage += ', ';
+                        backgroundPosition += ', ';
+                        backgroundSize += ', ';
+                        scrollData += ',';
+                    }
+                    
+                    backgroundImage += 'url(' + imageLink + ')';
+                    backgroundSize += myWidth + 'px auto'
+                    yPosTillNow -= expectedHeight;
+                    //heightTillNow += expectedHeight;
+                    backgroundPosition += 'left ' + yPosTillNow + 'px';
+                    scrollData += yPosTillNow;
+                    //totalHeight = heightTillNow;
+                };
+                
+                var ss = {
+                    backgroundImage: backgroundImage,
+                    backgroundPosition: backgroundPosition,
+                    backgroundSize: backgroundSize, 
+                    height: totalHeight + 'px',
+                };
+
+                div.css( ss );
+                div.data( 'qpscroll', scrollData );
+                helpers.scrollToNewPosition( div, - scrollElement.scrollTop(), options );
+    		},
+    		
             /**********************************************************
             ** init
             ** The main function - actually resets everything each time
             ** you call it
             ***********************************************************/
             init: function( element, options ) {
+            	$(window).resize(function() {
+            	    if(this.resizeTO) clearTimeout(this.resizeTO);
+            	    this.resizeTO = setTimeout(function() {
+            	        $(this).trigger('resizeEnd');
+            	    }, 250);
+            	});
+            	
+            	
                 if( element[ 0 ] == $( 'body' )[ 0 ] )
                 {
                     scrollElement = $( window );
@@ -50,14 +147,7 @@
                 
                 numberOfImages = options.imagesArray.length;
                 imageCounter = 0;
-                
-                var myWidth = element.innerWidth();
-                
-                var backgroundImage = '';
-                var backgroundSize = '';
-                var backgroundPosition = '';
-                var scrollData = '';
-                
+                                
                 var folder = options.imagesFolder;
                 
                 if( folder[ folder.length - 1] != '/' )
@@ -66,9 +156,6 @@
                 var imageWidths     = [];
                 var imageHeights    = [];
                 var imageLinks      = [];
-                
-                var totalHeight = 0;
-                
                 
                 //go through images, and create a bunch of strings for
                 $.each( options.imagesArray, function( index, image ){
@@ -88,85 +175,25 @@
                         imageHeights[ index ] = height;
                         
                         if( imageCounter == numberOfImages )
-                        {
-                            var index2;
-                            var yPosTillNow = 0;
-                            for( index2 = imageLinks.length - 1; index2 >= 0; index2 -- )
-                            {
-                                var imageLink = imageLinks[ index2 ];
-                                var width = imageWidths[ index2 ];
-                                var height = imageHeights[ index2 ];
-                                var expectedHeight = Math.ceil( height * myWidth / width ) - offset;
-                                totalHeight += expectedHeight;
-                            }
-                            
-                            yPosTillNow = totalHeight; 
-                            
-                            for( index2 = imageLinks.length - 1; index2 >= 0; index2 -- )
-                            {
-                                var imageLink = imageLinks[ index2 ];
-                                var width = imageWidths[ index2 ];
-                                var height = imageHeights[ index2 ];
-                                
-                                var expectedHeight = Math.ceil( height * myWidth / width ) - offset;
-                                if( backgroundImage.length > 0 )
-                                {
-                                    backgroundImage += ', ';
-                                    backgroundPosition += ', ';
-                                    backgroundSize += ', ';
-                                    scrollData += ',';
-                                }
-                                
-                                backgroundImage += 'url(' + imageLink + ')';
-                                backgroundSize += myWidth + 'px auto'
-                                yPosTillNow -= expectedHeight;
-                                //heightTillNow += expectedHeight;
-                                backgroundPosition += 'left ' + yPosTillNow + 'px';
-                                scrollData += yPosTillNow;
-                                //totalHeight = heightTillNow;
-                            };
-                            
-                            var ss = {
-                                backgroundImage: backgroundImage,
-                                backgroundPosition: backgroundPosition,
-                                backgroundSize: backgroundSize, 
-                                height: totalHeight + 'px'
-                            };
-
-                            $('.qpScroll').css( ss );
-                            $('.qpScroll').data( 'qpscroll', scrollData )
-                        };                        
+                        {	
+                        	helpers.setupBackgroundAfterImageLoad( scrollElement, div, imageLinks, imageWidths, imageHeights, options );
+                        };
                     };
                   
                     img.src = fullURL;                  
                 } );
+                
+                $(window).bind('resizeEnd', function() {
+                	helpers.setupBackgroundAfterImageLoad( scrollElement, div, imageLinks, imageWidths, imageHeights, options );
+                });
                                 
                 div.each(function(){
-                    var $this = $(this); // assigning the object
+                    var $that = $(this); // assigning the object
 
-                    scrollElement.scroll(function() {
-                        var yPos = -$( this ).scrollTop();
-                        var scrollDataStringArray = $this.data('qpscroll').split( "," );
-                        var scrollDataArray = [];
-                        $.each( scrollDataStringArray, function( index, positionString ){
-                           scrollDataArray[ index ] = parseInt( positionString );
-                        });
-                        
-                        var coords = '';
-                        var speed = options.firstSpeed;
-                        
-                        $.each( scrollDataArray , function( index, position ){
-                            
-                            speed = options.firstSpeed / Math.pow( options.neighbourRatio, ( numberOfImages - index ) );;
-                            var yPos2 = ( yPos / speed );
-                            if( coords.length > 0 )
-                                coords += ', ';
-                            coords += 'right ' + ( yPos2 + position ) + 'px'; 
-                        } );
-
-                        // Move the background
-                        $this.css({ backgroundPosition: coords });
-                    }); 
+                    scrollElement.scroll( function()
+            		{
+                    	helpers.scrollToNewPosition( $that, -$( this ).scrollTop(), options );
+            		});                    		
                 });    
         }
     };
