@@ -32,7 +32,7 @@
                     var yPos2 = ( yPos / speed );
                     if( coords.length > 0 )
                         coords += ', ';
-                    coords += 'right ' + ( yPos2 + position ) + 'px'; 
+                    coords += 'right ' + ( Math.round( yPos2 + position ) ) + 'px'; 
                 } );
 
                 // Move the background
