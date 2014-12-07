@@ -1,7 +1,7 @@
 qpScroll
 =============
 
-qpScroll is a jQuery plugin that creates a parallax background for any page or div. You can see an example at http://cigari.co.uk/qpscroll.
+qpScroll is a jQuery plugin that creates a parallax background for any page or div. You can see an example at http://www.cigari.co.uk/qpscroll.
 It is super simple to setup. It can be added to any existing page without the need to change the mark up.
 
 I have kept it super simple - the three major settings are:
@@ -34,6 +34,6 @@ I have only tested it on latest Chrome, Firefox and Safari.
 Future Dev
 =========
 Let me know if there are any fun features you like to see in it. It currently does what I need it to do for one of my own projects.
-Feel free to use it as it wish, but I would appreciate a plug to my website http://cigari.co.uk
+Feel free to use it as it wish, but I would appreciate a plug to my website http://www.cigari.co.uk
 
 Copyright (c) 2013 Ali Cigari @oofaish
